@@ -29,12 +29,10 @@ app.post('/login', async (req, res) => {
         });
 
         if (!user) {
-            // console.log("This email is not registered");
             return res.json({ error: 'This email is not registered' });
         }
 
         if (!password) {
-            // console.log("Password not provided");
             return res.json({ error: 'Password not provided' });
         }
 
@@ -60,7 +58,6 @@ app.post('/login', async (req, res) => {
 
         return res.status(400).json({ error: 'Wrong Password' });
     } catch (e) {
-        // console.error(e);
         return res.status(500).json({ error: 'Error occurred' });
     }
 });
@@ -80,7 +77,6 @@ app.post('/register', async (req, res) => {
             return res.json('Username already exists, please try another username.');
         }
         if (isValidEmail) {
-            // console.log('User with this email already exists');
             return res.json('User with this email already exists');
         }
 
@@ -96,7 +92,6 @@ app.post('/register', async (req, res) => {
 
         return res.json('Registered successfully');
     } catch (e) {
-        // console.error('Error:', e);
         return res.json(`Error occurred ${e}`);
     }
 });
@@ -135,13 +130,11 @@ app.post('/referrals', async (req, res) => {
 
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
-                // console.log('Failed to send email', error);
                 return res.status(500).json({ error: 'Failed to send email' });
             }
             res.status(201).json({ referral });
         });
     } catch (error) {
-        // console.log('Internal server error = ', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -161,11 +154,9 @@ app.get('/getReferrals', async (req, res) => {
                     refereeBonus: true,
                 },
             });
-            // console.log("Referrals:", referrals);
             res.json(referrals);
         } else {
             const referrals = await prisma.referral.findMany();
-            // console.log("Referrals:", referrals);
             res.json(referrals);
         }
 
@@ -176,6 +167,14 @@ app.get('/getReferrals', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+
+prisma.$connect()
+    .then(() => {
+        app.listen(PORT, () => {
+            console.log('Connected to database');
+            console.log(`Server running on port ${PORT}`);
+        });
+    })
+    .catch((error) => {
+        console.error('Failed to connect to the database', error);
+    });
